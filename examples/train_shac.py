@@ -47,7 +47,7 @@ def parse_arguments(description="Testing Args", custom_parameters=[]):
             print("ERROR: command line argument name, type/action must be defined, argument not added to parser")
             print("supported keys: name, type, default, action, help")
             print()
-    
+    parser.add_argument("--exp_name", type=str, default="default")
     args = parser.parse_args()
     
     if args.test:
@@ -106,9 +106,9 @@ if __name__ == '__main__':
     for key in vargs.keys():
         cfg_train["params"]["general"][key] = vargs[key]
 
-    traj_optimizer = shac.SHAC(cfg_train)
+    traj_optimizer = shac.SHAC(cfg_train, exp_name = args.exp_name)
 
     if args.train:
         traj_optimizer.train()
     else:
-        traj_optimizer.play(cfg_train)
+        traj_optimizer.play(cfg_train) 

@@ -1,0 +1,28 @@
+params:  
+  diff_env:
+    name: HumanoidEnv
+    stochastic_env: True
+    episode_length: 1000
+    MM_caching_frequency: 48
+    
+  algo:
+    name: adam 
+
+  config:
+    name: df_humanoid_bptt
+    env_name: dflex
+    actor_learning_rate: 2e-2 # adam
+    lr_schedule: linear # ['constant', 'linear']
+    gamma: 0.99
+    betas: [0.7, 0.95] # adam
+    max_epochs: 2000
+    steps_num: 1000
+    grad_norm: 1.0 
+    truncate_grads: True 
+    num_actors: 32 
+    save_interval: 200
+
+    player:
+      games_num: 4
+      num_actors: 1
+      print_stats: True

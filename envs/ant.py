@@ -179,8 +179,11 @@ class AntEnv(DFlexEnv):
             self.obs_buf_before_reset = self.obs_buf.clone()
             self.extras = {
                 'obs_before_reset': self.obs_buf_before_reset,
-                'episode_end': self.termination_buf
+                'episode_end': self.termination_buf,
+                'state':self.get_state()
                 }
+        else:
+            self.extras = {'state':self.get_state()}
 
         if len(env_ids) > 0:
            self.reset(env_ids)

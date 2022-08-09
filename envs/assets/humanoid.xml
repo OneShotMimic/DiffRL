@@ -1,5 +1,6 @@
 <mujoco model="humanoid">
-
+  <include file="./materials.xml"/>
+  
   <statistic extent="2" center="0 0 1"/>
 
   <option timestep="0.00555"/>

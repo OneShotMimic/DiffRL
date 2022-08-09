@@ -468,7 +468,18 @@ def parse_mjcf(
                     kd=contact_kd,
                     kf=contact_kf,
                     mu=contact_mu)
-
+            elif (geom_type == "box"):
+                builder.add_shape_box(
+                    link,
+                    geom_pos - last_joint_pos, # position relative to the parent frame
+                    geom_rot,
+                    geom_size[0]*0.5, # Because half extend?
+                    geom_size[1]*0.5, 
+                    geom_size[2]*0.5,
+                    ke=contact_ke,
+                    kd=contact_kd,
+                    kf=contact_kf,
+                    mu=contact_mu)
             else:
                 print("Type: " + geom_type + " unsupported")        
 

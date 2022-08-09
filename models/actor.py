@@ -45,7 +45,6 @@ class ActorDeterministicMLP(nn.Module):
     def forward(self, observations, deterministic = False):
         return self.actor(observations)
 
-
 class ActorStochasticMLP(nn.Module):
     def __init__(self, obs_dim, action_dim, cfg_network, device='cuda:0'):
         super(ActorStochasticMLP, self).__init__()
@@ -112,3 +111,16 @@ class ActorStochasticMLP(nn.Module):
         dist = Normal(mu, std)
 
         return dist.log_prob(actions)
+
+# Essentially it is an embedding space.
+class ActorActionEmbedding(nn.Module):
+    def __init__(self, action_dim, traj_length, device="cuda:0"):
+        super(ActorActionEmbedding, self).__init__()
+        self.device = device
+        self.actor = nn.Embedding(traj_length, action_dim).to(torch.device(self.device))
+
+    def forward(self, step_idx):
+        if not isinstance(step_idx, torch.Tensor):
+            step_idx = torch.tensor(step_idx)
+        return self.actor(step_idx.to(self.device)).view(1,-1)
+    

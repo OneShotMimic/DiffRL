@@ -33,7 +33,7 @@ from utils.time_report import TimeReport
 from utils.average_meter import AverageMeter
 
 class SHAC:
-    def __init__(self, cfg):
+    def __init__(self, cfg, exp_name=None):
         env_fn = getattr(envs, cfg["params"]["diff_env"]["name"])
 
         seeding(cfg["params"]["general"]["seed"])
@@ -108,6 +108,7 @@ class SHAC:
             # stochastic inference
             self.stochastic_evaluation = True
         else:
+            # In test mode switch on the deterministic evaluation (no stochastic)
             self.stochastic_evaluation = not (cfg['params']['config']['player'].get('determenistic', False) or cfg['params']['config']['player'].get('deterministic', False))
             self.steps_num = self.env.episode_length
 
@@ -165,6 +166,10 @@ class SHAC:
 
         # timer
         self.time_report = TimeReport()
+
+        # Test indicator
+        self.test = False
+        self.exp_name = exp_name
         
     def compute_actor_loss(self, deterministic = False):
         rew_acc = torch.zeros((self.steps_num + 1, self.num_envs), dtype = torch.float32, device = self.device)
@@ -312,13 +317,19 @@ class SHAC:
         obs = self.env.reset()
 
         games_cnt = 0
+
+        if self.test:
+            state_buffer = []
         while games_cnt < num_games:
             if self.obs_rms is not None:
                 obs = self.obs_rms.normalize(obs)
 
             actions = self.actor(obs, deterministic = deterministic)
 
-            obs, rew, done, _ = self.env.step(torch.tanh(actions))
+            obs, rew, done, info = self.env.step(torch.tanh(actions))
+
+            if self.test:
+                state_buffer.append(info["state"][0].cpu().numpy())
 
             episode_length += 1
 
@@ -338,6 +349,8 @@ class SHAC:
                     episode_length[done_env_id] = 0
                     episode_gamma[done_env_id] = 1.
                     games_cnt += 1
+        if self.test:
+            np.save(f"../data/states/{self.exp_name}.npy", state_buffer)
         
         mean_episode_length = np.mean(np.array(episode_length_his))
         mean_policy_loss = np.mean(np.array(episode_loss_his))
@@ -557,6 +570,7 @@ class SHAC:
         self.close()
     
     def play(self, cfg):
+        self.test = True
         self.load(cfg['params']['general']['checkpoint'])
         self.run(cfg['params']['config']['player']['games_num'])
         
